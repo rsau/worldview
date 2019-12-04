@@ -1,4 +1,4 @@
-import lodashEach from 'lodash/each';
+import { each as lodashEach, get as lodashGet } from 'lodash';
 
 var mousePosition = null;
 var spy = null;
@@ -136,14 +136,17 @@ var applyLayerListeners = function (layer) {
  */
 var inverseClip = function (event) {
   var ctx = event.context;
-
+  ctx.save();
+  ctx.beginPath();
   if (mousePosition) {
+    const type = lodashGet(event, 'target.wv.def.type');
+    const pixelRatio = (type === 'vector' || type === 'graticule') ? event.frameState.pixelRatio : 1;
+    console.log(type, pixelRatio)
     // only show a circle around the mouse
-    ctx.beginPath();
     ctx.globalCompositeOperation = 'destination-out';
     let x = mousePosition[0];
     let y = mousePosition[1];
-    ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    ctx.arc(x * pixelRatio, y * pixelRatio, pixelRatio * radius, 0, 2 * Math.PI);
     ctx.fill();
   }
 };
@@ -152,22 +155,24 @@ var inverseClip = function (event) {
  */
 var clip = function (event) {
   var ctx = event.context;
+
   ctx.save();
   ctx.beginPath();
-
   if (mousePosition) {
+    const type = lodashGet(event, 'target.wv.def.type');
+    const pixelRatio = (type === 'vector' || type === 'variable') ? event.frameState.pixelRatio : 1;
     // only show a circle around the mouse
     let x = mousePosition[0];
     let y = mousePosition[1];
-    let pixelRadius = radius;
-
-    ctx.arc(x, y, pixelRadius, 0, 2 * Math.PI);
+    // let pixelRadius = radius;
+    ctx.arc(x * pixelRatio, y * pixelRatio, pixelRatio * radius, 0, 2 * Math.PI);
 
     ctx.lineWidth = 4;
     ctx.strokeStyle = 'rgba(0,0,0,0.4)';
     ctx.stroke();
+    ctx.clip();
   }
-  ctx.clip();
+
 };
 var restore = function (event) {
   var ctx = event.context;
