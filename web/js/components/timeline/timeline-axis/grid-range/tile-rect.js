@@ -116,6 +116,7 @@ TileRect.propTypes = {
   gridWidth: PropTypes.number,
   index: PropTypes.number,
   item: PropTypes.object,
+  showHover: PropTypes.func,
   timeScale: PropTypes.string
 };
 
