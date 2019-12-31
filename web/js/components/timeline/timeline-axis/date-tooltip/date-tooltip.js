@@ -53,7 +53,14 @@ class DateToolTip extends PureComponent {
       toolTipDayOfYear = getDaysInYear(hoverTime);
       toolTipDisplay = 'block';
     }
-    const toolTipHeighOffset = this.props.isDataCoveragePanelOpen ? '-367' : '-100';
+    let toolTipHeightOffset = -100;
+    // handle active layer count dependent tooltip height
+    if (this.props.isDataCoveragePanelOpen) {
+      toolTipHeightOffset = -136;
+      const addHeight = Math.min(this.props.activeLayers.length, 5) * 47;
+      toolTipHeightOffset -= addHeight;
+      toolTipHeightOffset = Math.max(toolTipHeightOffset, -357);
+    }
     return (
       <React.Fragment>
         {
@@ -61,7 +68,7 @@ class DateToolTip extends PureComponent {
             ? <div
               className="date-tooltip"
               style={{
-                transform: `translate(${toolTipLeftOffset}px, ${toolTipHeighOffset}px)`,
+                transform: `translate(${toolTipLeftOffset}px, ${toolTipHeightOffset}px)`,
                 display: toolTipDisplay,
                 width: hasSubdailyLayers ? '270px' : '165px'
               }}

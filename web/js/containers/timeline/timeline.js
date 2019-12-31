@@ -1032,6 +1032,7 @@ class Timeline extends React.Component {
                   />
 
                   <AxisHoverLine
+                    activeLayers={this.props.activeLayers}
                     axisWidth={axisWidth}
                     hoverLinePosition={hoverLinePosition}
                     showHoverLine={showHoverLine}
@@ -1093,6 +1094,7 @@ class Timeline extends React.Component {
 
                   {!isTimelineDragging
                     ? <DateToolTip
+                      activeLayers={this.props.activeLayers}
                       axisWidth={axisWidth}
                       leftOffset={leftOffset}
                       hoverTime={hoverTime}
@@ -1205,6 +1207,7 @@ function mapStateToProps(state) {
   const isCompareModeActive = compare.active;
   const isSmallScreen = lessThan.medium;
   let hasSubdailyLayers = hasSubDaily(layers[compare.activeString]);
+  const activeLayers = layers[compare.activeString].filter(activeLayer => activeLayer.startDate);
 
   // handle reset of timescale and intervals if not subdaily
   if (!hasSubdailyLayers) {
@@ -1255,6 +1258,7 @@ function mapStateToProps(state) {
   );
   return {
     appNow,
+    activeLayers,
     isTourActive: tour.active,
     isSmallScreen,
     draggerSelected: isCompareA ? 'selected' : 'selectedB',

@@ -18,7 +18,13 @@ class AxisHoverLine extends PureComponent {
     } = this.props;
     // check for timeline/animation dragging and showhover handled by parent
     const showHover = !isTimelineDragging && !isAnimationDraggerDragging && showHoverLine;
-    const lineHeight = this.props.isDataCoveragePanelOpen ? 342 : 63;
+    let lineHeight = 63;
+    // handle active layer count dependent tooltip height
+    if (this.props.isDataCoveragePanelOpen) {
+      lineHeight = 111;
+      const addHeight = Math.min(this.props.activeLayers.length, 5) * 47;
+      lineHeight += addHeight;
+    }
     return (
       showHover &&
         <svg className="axis-hover-line-container" width={axisWidth} height={lineHeight} style={{ zIndex: 6 }}>

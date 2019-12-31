@@ -215,7 +215,7 @@ class TimelineData extends Component {
 
   render() {
     //! good layer with sporadic coverage for edge cases: GRACE Liquid Water Equivalent Thickness (Mascon, CRI)
-    const maxHeightScrollBar = '230px';
+    const maxHeightScrollBar = '225px';
     const mainContainerWidth = `${this.props.axisWidth + 78}px`;
     const mainContainerLeftOffset = `${this.props.parentOffset - 10}px`;
     const animateBottomClassName = `${this.props.isDataCoveragePanelOpen ? 'animate-timeline-data-panel-slide-up' : ''}`;
