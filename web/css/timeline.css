@@ -776,6 +776,11 @@ button:focus {
   overflow: hidden;
 }
 
+.data-panel-layer-coverage-line-container {
+  overflow: hidden;
+  height: 10px;
+}
+
 .data-panel-coverage-line {
   height: 10px;
   margin: 0 0 6px;

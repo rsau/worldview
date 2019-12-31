@@ -274,7 +274,7 @@ class TimelineData extends Component {
                           optionalLabelClassName={'timeline-data-panel-wv-checkbox-label-layer'}
                         />
                       </div>
-                      <div className={`data-panel-layer-coverage-line data-line-${layer.id}`} style={{ maxWidth: `${this.props.axisWidth}px`, overflow: 'hidden' }}>
+                      <div className={`data-panel-layer-coverage-line-container data-line-${layer.id}`} style={{ maxWidth: `${this.props.axisWidth}px` }}>
                         {multipleCoverageRanges
                           ? <div className="data-panel-coverage-line" style={{
                             position: 'relative',
