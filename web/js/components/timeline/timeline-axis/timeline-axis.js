@@ -2,7 +2,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Draggable from 'react-draggable';
 import moment from 'moment';
-
+import {
+  isEqual as lodashIsEqual,
+  isEmpty as lodashIsEmpty
+} from 'lodash';
 import GridRange from './grid-range/grid-range';
 
 import { getTimeRange } from './date-calc';
@@ -1145,6 +1148,7 @@ class TimelineAxis extends Component {
         timeScale,
         isCompareModeActive,
         hasSubdailyLayers,
+        matchingTimelineCoverage,
         timelineEndDateLimit,
         transformX,
         frontDate,
@@ -1166,7 +1170,8 @@ class TimelineAxis extends Component {
         nextProps.timelineEndDateLimit === timelineEndDateLimit &&
         nextProps.transformX === transformX &&
         nextProps.frontDate === frontDate &&
-        nextProps.backDate === backDate
+        nextProps.backDate === backDate &&
+        lodashIsEqual(nextProps.matchingTimelineCoverage, matchingTimelineCoverage)
       );
 
       const {
@@ -1200,6 +1205,61 @@ class TimelineAxis extends Component {
     return true;
   }
 
+  getLineDimensions = () => {
+    const {
+      axisWidth,
+      position,
+      transformX,
+      timeScale,
+      matchingTimelineCoverage
+    } = this.props;
+    const { startDate, endDate } = matchingTimelineCoverage;
+
+    const postionTransformX = position + transformX;
+    const gridWidth = timeScaleOptions[timeScale].timeAxis.gridWidth;
+    const frontDate = new Date(this.props.frontDate);
+    const backDate = new Date(this.props.backDate);
+    const layerStart = new Date(startDate);
+    const layerEnd = new Date(endDate);
+
+    let visible = true;
+    if (layerStart > backDate || layerEnd < frontDate) {
+      visible = false;
+    }
+
+    let leftOffset = 0;
+    // TODO: temp double value to accomodate backDate/frontDate update delay
+    let width = axisWidth * 2;
+    if (visible) {
+      if (layerStart < frontDate) {
+        leftOffset = 0;
+      } else {
+        // positive diff means layerStart more recent than frontDate
+        const diff = moment.utc(layerStart).diff(frontDate, timeScale, true);
+        const gridDiff = gridWidth * diff;
+        leftOffset = gridDiff + postionTransformX;
+        // console.log(timeScale, diff, layerStart, options, gridWidth);
+      }
+
+      if (layerEnd < backDate) {
+        // positive diff means layerEnd earlier than back date
+        const diff = moment.utc(layerEnd).diff(frontDate, timeScale, true);
+        const gridDiff = gridWidth * diff;
+        width = Math.max(gridDiff + postionTransformX - leftOffset, 0);
+        // console.log(width);
+      }
+    }
+
+    // console.log(visible, leftOffset, width, layerStart.toISOString(), layerEnd.toISOString());
+    // console.log(position, transformX);
+
+    return {
+      visible: visible,
+      leftOffset: leftOffset,
+      width: width
+    };
+  }
+
   render() {
     const {
       axisWidth,
@@ -1207,7 +1267,8 @@ class TimelineAxis extends Component {
       position,
       transformX,
       showHover,
-      showHoverOff
+      showHoverOff,
+      matchingTimelineCoverage
     } = this.props;
     const {
       currentTimeRange,
@@ -1215,6 +1276,11 @@ class TimelineAxis extends Component {
       leftBound,
       rightBound
     } = this.state;
+
+    let lineCoverageOptions;
+    if (!lodashIsEmpty(matchingTimelineCoverage)) {
+      lineCoverageOptions = this.getLineDimensions();
+    }
     return (
       <React.Fragment>
         <div className="timeline-axis-container"
@@ -1244,6 +1310,23 @@ class TimelineAxis extends Component {
                   <rect width={axisWidth} height={64}></rect>
                 </clipPath>
               </defs>
+              {matchingTimelineCoverage && lineCoverageOptions
+                ? <g transform={`translate(${-transformX}, 0)`}>
+                  <rect style={{
+                    left: lineCoverageOptions.leftOffset,
+                    visibility: lineCoverageOptions.visible ? 'visible' : 'hidden',
+                    margin: '0 0 6px 0'
+                  }}
+                  width={lineCoverageOptions.width}
+                  height={15}
+                  transform={`translate(${transformX + lineCoverageOptions.leftOffset}, 0)`}
+                  fill={'#0087f1'}
+                  stroke={'#00457b'}
+                  strokeWidth={1}
+                  />
+                </g>
+                : null
+              }
               <Draggable
                 axis="x"
                 handle=".axis-grid-container"
@@ -1299,6 +1382,7 @@ TimelineAxis.propTypes = {
   isTimelineDragging: PropTypes.bool,
   isTourActive: PropTypes.bool,
   leftOffset: PropTypes.number,
+  matchingTimelineCoverage: PropTypes.object,
   parentOffset: PropTypes.number,
   position: PropTypes.number,
   showHover: PropTypes.func,

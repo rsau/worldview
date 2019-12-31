@@ -67,7 +67,7 @@ class TimelineData extends Component {
     const frontDate = new Date(this.props.frontDate);
     const backDate = new Date(this.props.backDate);
     let layerStart, layerEnd;
-
+    // console.log(rangeStart, rangeEnd);
     if (rangeStart || layer.startDate) {
       layerStart = new Date(rangeStart || layer.startDate);
     } else {
@@ -80,6 +80,7 @@ class TimelineData extends Component {
     }
 
     let visible = true;
+    // console.log(layerStart.toISOString(), backDate.toISOString(), layerEnd.toISOString(), frontDate.toISOString());
     if (layerStart > backDate || layerEnd < frontDate) {
       visible = false;
     }
@@ -91,18 +92,21 @@ class TimelineData extends Component {
     let width = axisWidth * 2;
     if (visible) {
       if (layerStart < frontDate) {
+        // console.log(layerStart.toISOString(), frontDate.toISOString());
         leftOffset = 0;
       } else {
         // positive diff means layerStart more recent than frontDate
         const diff = moment.utc(layerStart).diff(frontDate, timeScale, true);
-        leftOffset = gridWidth * diff + postionTransformX;
+        const gridDiff = gridWidth * diff;
+        leftOffset = gridDiff + postionTransformX;
         borderRadiusLeft = '3px';
       }
 
       if (layerEnd < backDate) {
         // positive diff means layerEnd earlier than back date
         const diff = moment.utc(layerEnd).diff(frontDate, timeScale, true);
-        width = gridWidth * diff + postionTransformX - leftOffset;
+        const gridDiff = gridWidth * diff;
+        width = gridDiff + postionTransformX - leftOffset;
         borderRadiusRight = '3px';
       }
     }
@@ -210,22 +214,19 @@ class TimelineData extends Component {
   }
 
   render() {
+    //! good layer with sporadic coverage for edge cases: GRACE Liquid Water Equivalent Thickness (Mascon, CRI)
     const maxHeightScrollBar = '230px';
+    const mainContainerWidth = `${this.props.axisWidth + 78}px`;
+    const mainContainerLeftOffset = `${this.props.parentOffset - 10}px`;
     const animateBottomClassName = `${this.props.isDataCoveragePanelOpen ? 'animate-timeline-data-panel-slide-up' : ''}`;
     return (
       <div className={`timeline-data-panel-container ${animateBottomClassName}`} style={{
-        left: `${this.props.parentOffset - 10}px`,
-        width: `${this.props.axisWidth + 78}px`
+        left: mainContainerLeftOffset,
+        width: mainContainerWidth
       }}>
-        {this.props.isDataCoveragePanelOpen
-          ? <div
-            className={'timeline-data-panel'}
-            style={{
-              width: `${this.props.axisWidth + 78}px`
-            }}>
-            <header
-              className={'timeline-data-panel-header'}
-            >
+        {this.props.isDataCoveragePanelOpen &&
+          <div className={'timeline-data-panel'} style={{ width: mainContainerWidth }}>
+            <header className={'timeline-data-panel-header'}>
               <h3>LAYER COVERAGE</h3>
               <Checkbox
                 checked={this.state.isMatchingCoverageChecked}
@@ -251,139 +252,98 @@ class TimelineData extends Component {
 
                   const options = this.getLineDimensions(layer);
                   const enabled = layer.visible;
+                  const backgroundColor = enabled ? '#00457B' : 'grey';
                   // get date range to display
                   const dateRangeStart = (layer.startDate && layer.startDate.split('T')[0]) || 'start';
                   const dateRangeEnd = (layer.endDate && layer.endDate.split('T')[0]) || 'present';
                   const dateRange = `${dateRangeStart} - ${dateRangeEnd}`;
                   return (
-                    <React.Fragment key={index}>
-                      <div className={`data-panel-layer-item-${layer.id}`}
-                        style={{
-                          borderBottom: '1px solid #3c3c3c'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', padding: '5px' }}>
-                          <div className="data-panel-layer-item-title">{layer.title} <span className="data-panel-layer-item-subtitle">{layer.subtitle}</span></div>
-                          <Checkbox
-                            checked={!!this.state.checkedLayerIds[layer.id]}
-                            classNames='wv-checkbox-data-matching-layer'
-                            id={`wv-checkbox-data-matching-${layer.id}`}
-                            label={dateRange}
-                            name={`wv-checkbox-data-matching-${layer.id}`}
-                            onCheck={(isChecked) => this.toggleCoverageToFilterPool(isChecked, layer)}
-                            inputPosition={'right'}
-                            title='Add Layer to Matching Coverage Filter'
-                            optionalCaseClassName={'timeline-data-panel-wv-checkbox-container-layer'}
-                            optionalLabelClassName={'timeline-data-panel-wv-checkbox-label-layer'}
-                          />
-                        </div>
-                        <div className={`data-panel-layer-coverage-line-${layer.id}`} style={{ maxWidth: `${this.props.axisWidth}px`, overflow: 'hidden' }}>
-                          {multipleCoverageRanges
-                            ? <div style={{
-                              position: 'relative',
-                              width: `${options.width}px`,
-                              maxWidth: `${this.props.axisWidth}px`,
-                              height: '30px',
-                              overflow: 'hidden',
-                              // borderRadius: '5px',
-                              visibility: options.visible ? 'visible' : 'hidden',
-                              display: 'flex',
-                              margin: '0 0 6px 0',
-                              border: '1px solid grey'
-                            }}>
-                              {layer.dateRanges.map((range, index) => {
-                              // console.log(range);
-                                const rangeStart = range.startDate;
-                                const rangeEnd = range.endDate;
-                                const rangeInterval = Number(range.dateInterval);
-                                let rangeOptions;
-                                if (rangeInterval !== 1) {
-                                // const layerPeriod = layer.period;
-                                  const startDateLimit = new Date(this.props.frontDate);
-                                  let endDateLimit = new Date(this.props.backDate);
-                                  if (new Date(this.props.appNow) < endDateLimit) {
-                                    endDateLimit = new Date(this.props.appNow);
-                                  }
-
-                                  let dateIntervalStartDates = [];
-                                  if (new Date(rangeStart) < endDateLimit && new Date(rangeEnd) > startDateLimit) {
-                                    const frontBackDiff = moment.utc(endDateLimit).diff(startDateLimit, this.props.timeScale);
-                                    const midDate = moment.utc(startDateLimit).add(Math.floor(frontBackDiff / 2), this.props.timeScale);
-                                    const midDateFormat = new Date(midDate.format());
-                                    console.log(frontBackDiff, new Date(midDate.format()));
-                                    // TODO: need to accomodate full front/back dates
-                                    dateIntervalStartDates = datesinDateRanges(layer, midDateFormat, startDateLimit, endDateLimit);
-                                  // dateIntervalStartDates = datesinDateRanges(layer, startDateLimit);
-                                  }
-
-                                  return dateIntervalStartDates.map((rangeDate, index) => {
-                                  // console.log(rangeDate);
-                                    const minYear = rangeDate.getUTCFullYear();
-                                    const minMonth = rangeDate.getUTCMonth();
-                                    const minDay = rangeDate.getUTCDate();
-                                    const rangeDateEnd = new Date(minYear, minMonth, minDay + rangeInterval);
-                                    rangeOptions = this.getLineDimensions(layer, rangeDate, rangeDateEnd);
-                                    // console.log(rangeDate.toISOString(), rangeOptions);
-
-                                    const border = index > 0 && index < dateIntervalStartDates.length - 1 ? '1px solid white' : '1px solid transparent';
-                                    // const borderRadius = index > 0 && index < dateIntervalStartDates.length - 1 ? '0' : '5px';
-                                    return (
-                                    // null
-                                      <React.Fragment key={index}>
-                                        <div style={{
-                                          position: 'absolute',
-                                          left: rangeOptions.leftOffset,
-                                          width: `${rangeOptions.width}px`,
-                                          // maxWidth: `${this.props.axisWidth}px`,
-                                          height: '30px',
-                                          backgroundColor: enabled ? '#00457B' : 'grey',
-                                          border: border,
-                                          // borderRadius: borderRadius,
-                                          visibility: rangeOptions.visible ? 'visible' : 'hidden',
-                                          margin: '0 0 6px 0'
-                                        }}>{index}{rangeDate.toISOString()}</div>
-                                      </React.Fragment>
-                                    );
-                                  });
-                                } else {
-                                  rangeOptions = this.getLineDimensions(layer, rangeStart, rangeEnd);
-                                  return (
-                                    <React.Fragment key={index}>
-                                      <div style={{
-                                        position: 'absolute',
-                                        left: rangeOptions.leftOffset,
-                                        width: `${rangeOptions.width}px`,
-                                        // maxWidth: `${this.props.axisWidth}px`,
-                                        height: '10px',
-                                        backgroundColor: enabled ? '#00457B' : 'grey',
-                                        // borderRadius: '5px',
-                                        visibility: rangeOptions.visible ? 'visible' : 'hidden',
-                                        margin: '0 0 6px 0',
-                                        border: '1px solid grey'
-                                      }}>{rangeStart}</div>
-                                    </React.Fragment>
-                                  );
-                                }
-                              })}
-                            </div>
-                            : <div className="data-panel-coverage-line" style={{
-                              left: options.leftOffset,
-                              width: `${options.width}px`,
-                              backgroundColor: enabled ? '#00457B' : 'grey',
-                              borderRadius: options.borderRadius,
-                              visibility: options.visible ? 'visible' : 'hidden'
-                            }}>
-                            </div>
-                          }
-                        </div>
+                    <div key={index} className={`data-panel-layer-item data-item-${layer.id}`}>
+                      <div className="data-panel-layer-item-header">
+                        <div className="data-panel-layer-item-title">{layer.title} <span className="data-panel-layer-item-subtitle">{layer.subtitle}</span></div>
+                        <Checkbox
+                          checked={!!this.state.checkedLayerIds[layer.id]}
+                          classNames='wv-checkbox-data-matching-layer'
+                          id={`wv-checkbox-data-matching-${layer.id}`}
+                          label={dateRange}
+                          name={`wv-checkbox-data-matching-${layer.id}`}
+                          onCheck={(isChecked) => this.toggleCoverageToFilterPool(isChecked, layer)}
+                          inputPosition={'right'}
+                          title='Add Layer to Matching Coverage Filter'
+                          optionalCaseClassName={'timeline-data-panel-wv-checkbox-container-layer'}
+                          optionalLabelClassName={'timeline-data-panel-wv-checkbox-label-layer'}
+                        />
                       </div>
-                    </React.Fragment>
+                      <div className={`data-panel-layer-coverage-line data-line-${layer.id}`} style={{ maxWidth: `${this.props.axisWidth}px`, overflow: 'hidden' }}>
+                        {multipleCoverageRanges
+                          ? <div className="data-panel-coverage-line" style={{
+                            position: 'relative',
+                            width: `${options.width}px`
+                          }}>
+                            {layer.dateRanges.map((range, index) => {
+                              const rangeStart = range.startDate;
+                              const rangeEnd = range.endDate;
+                              const rangeInterval = Number(range.dateInterval);
+                              let rangeOptions;
+                              if (rangeInterval !== 1 && this.props.timeScale === 'day') {
+                                const startDateLimit = new Date(this.props.frontDate);
+                                let endDateLimit = new Date(this.props.backDate);
+                                if (new Date(this.props.appNow) < endDateLimit) {
+                                  endDateLimit = new Date(this.props.appNow);
+                                }
+
+                                let dateIntervalStartDates = [];
+                                if (new Date(rangeStart) < endDateLimit && new Date(rangeEnd) > startDateLimit) {
+                                  dateIntervalStartDates = datesinDateRanges(layer, endDateLimit, startDateLimit, endDateLimit);
+                                }
+
+                                return dateIntervalStartDates.map((rangeDate, index) => {
+                                  const minYear = rangeDate.getUTCFullYear();
+                                  const minMonth = rangeDate.getUTCMonth();
+                                  const minDay = rangeDate.getUTCDate();
+                                  const rangeDateEnd = new Date(minYear, minMonth, minDay + rangeInterval);
+                                  rangeOptions = this.getLineDimensions(layer, rangeDate, rangeDateEnd);
+
+                                  return rangeOptions.visible && (
+                                    <div className="data-panel-coverage-line" key={index} style={{
+                                      position: 'absolute',
+                                      left: rangeOptions.leftOffset,
+                                      width: `${rangeOptions.width}px`,
+                                      backgroundColor: backgroundColor,
+                                      borderRadius: rangeOptions.borderRadius
+                                    }}>{rangeDate.toISOString().split('T')[0]}</div>
+                                  );
+                                });
+                              } else {
+                                rangeOptions = this.getLineDimensions(layer, rangeStart, rangeEnd);
+                                return rangeOptions.visible && (
+                                  <div className="data-panel-coverage-line" key={index} style={{
+                                    position: 'absolute',
+                                    left: rangeOptions.leftOffset,
+                                    width: `${rangeOptions.width}px`,
+                                    backgroundColor: backgroundColor,
+                                    borderRadius: rangeOptions.borderRadius
+                                  }}>{rangeStart}</div>
+                                );
+                              }
+                            })}
+                          </div>
+                          : options.visible && <div className="data-panel-coverage-line" style={{
+                            position: 'relative',
+                            left: options.leftOffset,
+                            width: `${options.width}px`,
+                            backgroundColor: backgroundColor,
+                            borderRadius: options.borderRadius
+                          }}>
+                          </div>
+                        }
+                      </div>
+                    </div>
                   );
                 })}
               </div>
             </Scrollbars>
           </div>
-          : null
         }
       </div>
     );

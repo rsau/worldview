@@ -18,15 +18,15 @@ class AxisHoverLine extends PureComponent {
     } = this.props;
     // check for timeline/animation dragging and showhover handled by parent
     const showHover = !isTimelineDragging && !isAnimationDraggerDragging && showHoverLine;
+    const lineHeight = this.props.isDataCoveragePanelOpen ? 342 : 63;
     return (
-      showHover
-        ? <svg className="axis-hover-line-container" width={axisWidth} height={63}>
+      showHover &&
+        <svg className="axis-hover-line-container" width={axisWidth} height={lineHeight} style={{ zIndex: 6 }}>
           <line className="axis-hover-line"
-            stroke="#0f51c0" strokeWidth="2" x1="0" x2="0" y1="0" y2="63"
+            stroke="#0f51c0" strokeWidth="2" x1="0" x2="0" y1="0" y2={lineHeight}
             transform={`translate(${hoverLinePosition + 1}, 0)`}
           />
         </svg>
-        : null
     );
   }
 }

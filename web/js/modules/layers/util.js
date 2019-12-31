@@ -91,11 +91,13 @@ export function prevDateInDateRange(def, date, dateArray) {
    * Return an array of dates based on the dateRange the current date falls in.
    *
    * @method datesinDateRanges
-   * @param  {object} def           A layer object
-   * @param  {object} date          A date object
+   * @param  {object} def            A layer object
+   * @param  {object} date           A date object
+   * @param  {object} startDateLimit A date object (optional) used as start date of timeline range for available data
+   * @param  {object} endDateLimit   A date object (optional) used as end date of timeline range for available data
    * @return {array}                An array of dates with normalized timezones
    */
-export function datesinDateRanges(def, date) {
+export function datesinDateRanges(def, date, startDateLimit, endDateLimit) {
   const dateArray = [];
   let currentDate = new Date(date.getTime());
 
@@ -142,15 +144,54 @@ export function datesinDateRanges(def, date) {
       // Daily layers
     } else if (def.period === 'daily') {
       const maxDayDate = new Date(maxYear, maxMonth, maxDay + dateInterval);
-      if (currentDate >= minDate && currentDate <= maxDayDate) {
-        dayDifference = util.dayDiff(minDate, maxDayDate);
+
+      // conditional revision of maxEndDate for data availability partial coverage
+      let maxEndDate = maxDayDate;
+      if (startDateLimit && endDateLimit) {
+        const frontDateWithinRange = startDateLimit > minDate && startDateLimit < maxEndDate;
+        const backDateWithinRange = endDateLimit < maxEndDate && endDateLimit > minDate;
+        if (frontDateWithinRange || backDateWithinRange) {
+          maxEndDate = endDateLimit;
+        }
+      }
+      if (currentDate >= minDate && currentDate <= maxEndDate) {
+        dayDifference = util.dayDiff(minDate, maxEndDate);
         // handle non-1 day intervals to prevent over pushing unused dates to dateArray
         dayDifference = Math.ceil(dayDifference / dateInterval);
       }
+
+      // get minStartDate for partial range coverage starting date
+      let minStartDayDate;
+      if (startDateLimit && endDateLimit) {
+        let prevDate = '';
+        for (i = 0; i <= (dayDifference + 1); i++) {
+          if (minStartDayDate) {
+            continue;
+          }
+          let day = new Date(minYear, minMonth, minDay + i * dateInterval);
+          day = new Date(day.getTime() - (day.getTimezoneOffset() * 60000));
+
+          if (day > startDateLimit || day.getTime() === startDateLimit.getTime()) {
+            minStartDayDate = prevDate;
+          } else {
+            prevDate = day;
+          }
+        }
+      }
+
       for (i = 0; i <= (dayDifference + 1); i++) {
         let day = new Date(minYear, minMonth, minDay + i * dateInterval);
         day = new Date(day.getTime() - (day.getTimezoneOffset() * 60000));
-        dateArray.push(day);
+
+        if (minStartDayDate) {
+          const dayTime = day.getTime();
+          const minStartDayDateTime = minStartDayDate.getTime();
+          if (dayTime === minStartDayDateTime || (day > minStartDayDate && day < maxDayDate)) {
+            dateArray.push(day);
+          }
+        } else {
+          dateArray.push(day);
+        }
       }
       // Subdaily layers
     } else if (def.period === 'subdaily') {
@@ -184,6 +225,7 @@ export function datesinDateRanges(def, date) {
       }
     }
   });
+  // console.log(dateArray, dateArray[0], dateArray[dateArray.length - 1]);
   return dateArray;
 };
 

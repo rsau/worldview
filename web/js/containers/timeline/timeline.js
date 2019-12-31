@@ -60,7 +60,6 @@ import {
 
 const ANIMATION_DELAY = 500;
 const preventDefaultFunc = (e) => {
-  console.dir(e);
   e.preventDefault();
 };
 

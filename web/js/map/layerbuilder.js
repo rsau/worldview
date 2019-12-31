@@ -214,9 +214,8 @@ export function mapLayerBuilder(models, config, cache, ui, store) {
     // Don't key by time if this is a static layer--it is valid for
     // every date.
     if (def.period) {
-      date = util.toISOStringSeconds(
-        util.roundTimeOneMinute(self.getRequestDates(def, options).closestDate)
-      );
+      const closestDate = options.date || self.getRequestDates(def, options).closestDate;
+      date = util.toISOStringSeconds(util.roundTimeOneMinute(closestDate));
     }
     if (isPaletteActive(def.id, activeGroupStr, state)) {
       style = getPaletteKeys(def.id, undefined, state);

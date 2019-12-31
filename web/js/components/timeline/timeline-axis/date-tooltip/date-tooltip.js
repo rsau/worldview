@@ -27,7 +27,7 @@ class DateToolTip extends PureComponent {
     const showDraggerToolTip = !!(showDraggerTime && draggerTimeState);
     const showHoverToolTip = !!(showHoverLine && hoverTime);
 
-    let toolTipLeftOffest;
+    let toolTipLeftOffset;
     let toolTipDate;
     let toolTipDayOfYear;
     let toolTipDisplay;
@@ -43,16 +43,17 @@ class DateToolTip extends PureComponent {
         draggerTime = draggerTimeStateB;
         position = draggerPositionB;
       }
-      toolTipLeftOffest = position - (hasSubdailyLayers ? 87 : 35);
+      toolTipLeftOffset = position - (hasSubdailyLayers ? 87 : 35);
       toolTipDate = hasSubdailyLayers ? draggerTime.split('T').join(' ') : draggerTime.split('T')[0];
       toolTipDayOfYear = getDaysInYear(draggerTime);
       toolTipDisplay = position > -49 && position < axisWidth - 49 ? 'block' : 'none';
     } else if (showHoverToolTip) { // handle hover tooltip
-      toolTipLeftOffest = hasSubdailyLayers ? leftOffset - 136 : leftOffset - 84;
+      toolTipLeftOffset = hasSubdailyLayers ? leftOffset - 136 : leftOffset - 84;
       toolTipDate = hasSubdailyLayers ? hoverTime.split('T').join(' ') : hoverTime.split('T')[0];
       toolTipDayOfYear = getDaysInYear(hoverTime);
       toolTipDisplay = 'block';
     }
+    const toolTipHeighOffset = this.props.isDataCoveragePanelOpen ? '-367' : '-100';
     return (
       <React.Fragment>
         {
@@ -60,7 +61,7 @@ class DateToolTip extends PureComponent {
             ? <div
               className="date-tooltip"
               style={{
-                transform: `translate(${toolTipLeftOffest}px, -100px)`,
+                transform: `translate(${toolTipLeftOffset}px, ${toolTipHeighOffset}px)`,
                 display: toolTipDisplay,
                 width: hasSubdailyLayers ? '270px' : '165px'
               }}

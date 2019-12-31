@@ -40,13 +40,14 @@ export class Checkbox extends React.Component {
   }
 
   render() {
+    // console.log(this.props);
     const { checked } = this.state;
-    const { isRound, color, classNames, id, name, title, label } = this.props;
+    const { isRound, color, classNames, id, name, optionalCaseClassName, optionalLabelClassName, title, label } = this.props;
     const roundClassName = isRound ? 'wv-checkbox-round ' : '';
     const defaultClassName = 'wv-checkbox ';
     const checkedClassName = checked ? 'checked ' : '';
     const caseClassName =
-      defaultClassName + roundClassName + checkedClassName + color;
+      defaultClassName + roundClassName + checkedClassName + optionalCaseClassName + color;
 
     return (
       <div className={caseClassName} onClick={this.onClick.bind(this)}>
@@ -59,16 +60,19 @@ export class Checkbox extends React.Component {
           className={classNames}
           onChange={this.handleChange.bind(this)}
         />
-        <label htmlFor={id}>{label}</label>
+        <label className={optionalLabelClassName} htmlFor={id}>{label}</label>
       </div>
     );
   }
 }
 Checkbox.defaultProps = {
+  inputPosition: 'left',
   checked: true,
   color: '',
   isRound: false,
-  onCheck: null
+  onCheck: null,
+  optionalCaseClassName: '',
+  optionalLabelClassName: ''
 };
 
 Checkbox.propTypes = {
@@ -81,5 +85,8 @@ Checkbox.propTypes = {
   name: PropTypes.string,
   onCheck: PropTypes.func,
   onClick: PropTypes.func,
+  optionalCaseClassName: PropTypes.string,
+  optionalLabelClassName: PropTypes.string,
+  positionRelativeToLabel: PropTypes.string,
   title: PropTypes.string
 };

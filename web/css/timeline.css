@@ -667,3 +667,116 @@ button:focus {
 .datepicker-navbar-btn:hover {
   background: #fff;
 }
+
+/* TIMELINE DATA PANEL */
+
+.timeline-data-panel-container {
+  position: absolute;
+  bottom: -300px;
+  opacity: 0;
+  transition: all 0.4s ease-out;
+  z-index: 5;
+}
+
+.animate-timeline-data-panel-slide-up {
+  bottom: 66px;
+  opacity: 1;
+}
+
+.timeline-data-panel i.wv-close:hover {
+  color: #999;
+  cursor: pointer;
+}
+
+.timeline-data-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #808080;
+  padding: 5px;
+}
+
+.timeline-data-panel-header h3 {
+  padding: 5px;
+}
+
+.timeline-data-panel-wv-checkbox-container,
+.timeline-data-panel-wv-checkbox-container-layer {
+  margin-left: auto;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+}
+
+.timeline-data-panel-wv-checkbox-container {
+  padding-right: 5px;
+}
+
+.timeline-data-panel-wv-checkbox-container-layer {
+  width: 200px;
+  padding-right: 14px;
+}
+
+.timeline-data-panel-wv-checkbox-label {
+  padding-right: 5px;
+}
+
+.timeline-data-panel-wv-checkbox-label-layer {
+  padding-right: 5px;
+  font-size: 11px;
+}
+
+.wv-checkbox-data-matching-main:hover,
+.wv-checkbox-data-matching-layer:hover {
+  cursor: pointer;
+}
+
+#wv-checkbox-data-matching-main {
+  height: 18px;
+  width: 22px;
+  right: 10px;
+  bottom: 1px;
+  left: 231px;
+}
+
+.wv-checkbox-data-matching-layer {
+  height: 18px !important;
+  width: 22px !important;
+  right: 10px !important;
+  bottom: 0 !important;
+  left: 157px !important;
+}
+
+.timeline-data-panel {
+  position: relative;
+  background-color: #212121;
+  color: #fff;
+  border: 1px solid #595959;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+}
+
+.data-panel-layer-item {
+  border-bottom: 1px solid #3c3c3c;
+}
+
+.data-panel-layer-item-header {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+}
+
+.data-panel-layer-item-subtitle {
+  color: #999;
+  font-size: 11px;
+  padding-left: 3px;
+}
+
+.data-panel-layer-list {
+  overflow: hidden;
+}
+
+.data-panel-coverage-line {
+  height: 10px;
+  margin: 0 0 6px;
+}
