@@ -758,12 +758,13 @@ button:focus {
 
 .data-panel-layer-item {
   border-bottom: 1px solid #3c3c3c;
+  padding-bottom: 5px;
 }
 
 .data-panel-layer-item-header {
   display: flex;
   align-items: center;
-  padding: 5px;
+  padding: 5px 5px 0;
 }
 
 .data-panel-layer-item-subtitle {
@@ -778,10 +779,9 @@ button:focus {
 
 .data-panel-layer-coverage-line-container {
   overflow: hidden;
-  height: 10px;
+  height: 12px;
 }
 
 .data-panel-coverage-line {
-  height: 10px;
-  margin: 0 0 6px;
+  height: 12px;
 }
