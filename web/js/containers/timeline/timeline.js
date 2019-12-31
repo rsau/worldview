@@ -8,6 +8,7 @@ import ErrorBoundary from '../../containers/error-boundary';
 import MobileDatePicker from '../../components/timeline/mobile-date-picker';
 
 import TimelineAxis from '../../components/timeline/timeline-axis/timeline-axis';
+import TimelineData from '../../components/timeline/timeline-data';
 import TimeScaleIntervalChange from '../../components/timeline/timeline-controls/interval-timescale-change';
 import DraggerContainer from '../../components/timeline/timeline-draggers/dragger-container';
 import AxisHoverLine from '../../components/timeline/timeline-axis/date-tooltip/axis-hover-line';
@@ -59,6 +60,7 @@ import {
 
 const ANIMATION_DELAY = 500;
 const preventDefaultFunc = (e) => {
+  console.dir(e);
   e.preventDefault();
 };
 
@@ -92,7 +94,9 @@ class Timeline extends React.Component {
       initialLoadComplete: false,
       timelineHidden: false,
       hasMoved: false,
-      rangeSelectorMax: { end: false, start: false, startOffset: -50, width: 50000 }
+      rangeSelectorMax: { end: false, start: false, startOffset: -50, width: 50000 },
+      matchingTimelineCoverage: {},
+      isDataCoveragePanelOpen: false
     };
     // left/right arrows
     const throttleSettings = { leading: true, trailing: false };
@@ -650,6 +654,28 @@ class Timeline extends React.Component {
     });
   }
 
+  /**
+  * @desc set matching data coverage range for selected layers timeline
+  * @param {Object} dateRange
+  * @returns {void}
+  */
+  setMatchingTimelineCoverage = (dateRange) => {
+    this.setState({
+      matchingTimelineCoverage: dateRange
+    });
+  }
+
+  /**
+  * @desc toggle data coverage panel open/closed
+  * @param {Boolean} isOpen
+  * @returns {void}
+  */
+  toggleDataCoveragePanel = (isOpen) => {
+    this.setState({
+      isDataCoveragePanelOpen: isOpen
+    });
+  }
+
   static getDerivedStateFromProps(props, currentState) {
     // Update animation Date states when animation is initiated
     if (!currentState.animationEndLocationDate && !currentState.animationStartLocationDate && props.animStartLocationDate && props.animEndLocationDate) {
@@ -769,10 +795,11 @@ class Timeline extends React.Component {
             isArrowDown,
             isTimelineDragging,
             isDraggerDragging,
-            isAnimationDraggerDragging
+            isAnimationDraggerDragging,
+            isDataCoveragePanelOpen
           } = self.state;
           const { isAnimationPlaying } = self.props;
-          const userIsInteracting = isArrowDown || isTimelineDragging || isDraggerDragging || isAnimationDraggerDragging;
+          const userIsInteracting = isArrowDown || isTimelineDragging || isDraggerDragging || isAnimationDraggerDragging || isDataCoveragePanelOpen;
           if (!userIsInteracting && !isAnimationPlaying) {
             return resolve();
           }
@@ -1001,6 +1028,7 @@ class Timeline extends React.Component {
                     isDraggerDragging={isDraggerDragging}
                     isTimelineDragging={isTimelineDragging}
                     hasMoved={hasMoved}
+                    matchingTimelineCoverage={this.state.matchingTimelineCoverage}
                   />
 
                   <AxisHoverLine
@@ -1009,6 +1037,7 @@ class Timeline extends React.Component {
                     showHoverLine={showHoverLine}
                     isTimelineDragging={isTimelineDragging}
                     isAnimationDraggerDragging={isAnimationDraggerDragging}
+                    isDataCoveragePanelOpen={this.state.isDataCoveragePanelOpen}
                   />
 
                   {isAnimationWidgetOpen &&
@@ -1075,9 +1104,42 @@ class Timeline extends React.Component {
                       hasSubdailyLayers={hasSubdailyLayers}
                       showDraggerTime={showDraggerTime}
                       showHoverLine={showHoverLine}
+                      isDataCoveragePanelOpen={this.state.isDataCoveragePanelOpen}
                     />
                     : null
                   }
+                </div>
+
+                {/* Timeline Data Panel */}
+                { frontDate && backDate && timeScale && axisWidth &&
+                  <TimelineData
+                    appNow={this.props.appNow}
+                    position={position}
+                    transformX={transformX}
+                    timeScale={timeScale}
+                    frontDate={frontDate}
+                    backDate={backDate}
+                    timelineStartDateLimit={timelineStartDateLimit}
+                    parentOffset={parentOffset}
+                    axisWidth={axisWidth}
+                    setMatchingTimelineCoverage={this.setMatchingTimelineCoverage}
+                    matchingTimelineCoverage={this.state.matchingTimelineCoverage}
+                    toggleDataCoveragePanel={this.toggleDataCoveragePanel}
+                    isDataCoveragePanelOpen={this.state.isDataCoveragePanelOpen}
+                  />
+                }
+
+                {/* TEMP DATA COVERAGE PANEL OPEN/CLOSE TOGGLE */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    bottom: 100,
+                    background: 'cornflowerblue',
+                    padding: '5px'
+                  }}
+                >
+                  <button onClick={() => this.toggleDataCoveragePanel(!this.state.isDataCoveragePanelOpen)}>TOGGLE DATA PANEL</button>
                 </div>
 
                 {/* custom interval selector */}
