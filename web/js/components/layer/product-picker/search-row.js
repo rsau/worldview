@@ -462,6 +462,7 @@ class LayerRow extends React.Component {
           </h3>
           {subtitle && <h5>{subtitle}</h5>}
         </div>
+
         {isMetadataExpanded && (
           <div className="source-metadata visible">
             {layer.startDate && (
@@ -486,6 +487,7 @@ class LayerRow extends React.Component {
                 )}
               </p>
             )}
+            
             {isDateRangesExpanded && (
               <div className="layer-date-wrap">
                 <p>Date Ranges:</p>
