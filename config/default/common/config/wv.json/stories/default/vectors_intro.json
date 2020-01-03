@@ -4,8 +4,8 @@
       "id": "vectors_intro",
       "type": "default",
       "title": "Introducing Vectors!",
-      "description": "Interact with vectors in Worldview",
-      "backgroundImage": "vectors_background.png",
+      "description": "Interact with point and polygon vector features.",
+      "backgroundImage": "vector_intro_background.png",
       "backgroundImageHover": "",
       "readMoreLinks": [],
       "steps": [
