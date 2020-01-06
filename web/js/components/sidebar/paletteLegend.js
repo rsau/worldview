@@ -258,8 +258,8 @@ class PaletteLegend extends React.Component {
         {isMoreThanOneColorBar ? (
           <div className="wv-palettes-title">{legend.title}</div>
         ) : (
-            ''
-          )}
+          ''
+        )}
         <div className="colorbar-case">
           <canvas
             className="wv-palettes-colorbar"
@@ -397,7 +397,7 @@ class PaletteLegend extends React.Component {
         this['canvas_' + index] = React.createRef();
         return this.renderScale(colorMap, index, paletteLegends.length > 1);
       } else if (colorMap.type === 'classification') {
-        console.log(paletteLegends)
+        console.log(paletteLegends);
         return this.renderClasses(colorMap, index);
       }
     });
